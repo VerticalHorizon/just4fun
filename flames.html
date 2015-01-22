@@ -1,0 +1,85 @@
+<!doctype html>
+<html>
+    <head>
+        <title>canvasflames</title>
+        <meta charset='utf-8' />
+    </head>
+    <body style="background-color:black;">
+        <style type="text/css">
+            #flames {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                margin-top: -240px;
+                margin-left: -320px;
+            }
+        </style>
+        <canvas height='480' width='640' id='flames'>Update your browser</canvas>
+        <script>
+            var flames  = document.getElementById("flames");
+            flames.addEventListener('click', function(){
+                document.write('<img style="width:100%; height:100%" src="'+flames.toDataURL("image/png")+'"/>');
+            })
+                ctx     = flames.getContext('2d');
+                width   = flames.width;
+                height  = flames.height;
+                size    = 4;
+
+            function pixel(x, y, color) {
+                ctx.fillStyle = color || 'black';
+                ctx.fillRect(x, y, size, size);
+                return color;
+            }
+
+            ctx.fillRect(0, 0, width, height);
+
+            // initialize palette
+            var palette = [];
+            for (var i = 0; i < 255; i+=1) {
+                palette[palette.length] = i.toString(16)+'0000';
+            }
+            for (var i = 0; i < 255; i+=1) {
+                palette[palette.length] = 'ff'+i.toString(16)+'00';
+            }
+
+            dimensionX = Math.round(width/size);
+            dimensionY = Math.round(height/size);
+            matrix = new Array(dimensionX);
+            for (var x = dimensionX; x >= 0; x--) {
+                matrix[x] = new Array(dimensionY);
+                for (var y = dimensionY; y >= 0; y--) {
+
+                        matrix[x][y] = 0;
+                }
+            }         
+
+            setInterval(function(){
+                for (var y = dimensionY-1; y >= 0; y--) {
+                    for (var x = dimensionX-1; x >= 1; x--) {
+                        if (y >= dimensionY-2) {
+                            var index = parseInt(Math.random()*(palette.length-1));
+                            matrix[x][y] = index;
+                            pixel(x*size, y*size, '#'+palette[index] );
+                        } else {
+                            var elements = [
+                                matrix[x-1][y+2],
+                                matrix[x][y+2],
+                                matrix[x+1][y+2],
+                                matrix[x-1][y+1],
+                                matrix[x][y+1],
+                                matrix[x+1][y+1],
+                                ];
+                            var sum = 0;
+                            for (var i = elements.length-1; i >= 0; i--){
+                                sum += elements[i];
+                            }
+                            var index = parseInt(sum/elements.length - 2);
+                            matrix[x][y] = index;
+                            pixel(x*size, y*size, '#'+palette[index]);
+                        }
+                    }
+                }
+            }, 100)
+        </script>
+    </body>
+</html>
